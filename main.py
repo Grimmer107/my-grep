@@ -1,22 +1,45 @@
 import sys
-
+import re
 # import pyparsing - available if you need it!
 # import lark - available if you need it!
 
 
-def match_pattern(input_line, pattern):
-    if len(pattern) == 1:
-        return pattern in input_line
-    elif pattern == "\d":
-        return any(char.isdigit() for char in input_line)
-    elif pattern == "\w":
-        return any(char.isalnum() for char in input_line)
-    elif pattern.startswith("[") and pattern.endswith("]"):
-        pattern = pattern.removeprefix("[").removesuffix("]")
-        allowed_chars = set(pattern)
-        return any(char in allowed_chars for char in input_line)
-    else:
-        raise RuntimeError(f"Unhandled pattern: {pattern}")
+def match_pattern(input_line, patterns):
+    # pattern = re.split('[\\\[\]]', pattern)
+    patterns = patterns.replace(" ", " \s ")
+    patterns = patterns.replace("\d", "\d ").replace("\w", "\w ")
+    patterns = patterns.replace("[", " [").replace("]", "] ").split()
+    char_count = 0
+    print(patterns)
+
+    for idx, pattern in enumerate(patterns):
+        # search a specific single character
+        if len(pattern) == 1:
+            return pattern in input_line
+        
+        # search for numeric character
+        elif pattern == "\d":
+            return any(char.isdigit() for char in input_line)
+        
+        # search for alphanumeric character
+        elif pattern == "\w":
+            return any(char.isalnum() for char in input_line)
+        
+        # search for negative character groups e.g. [^abc]
+        elif pattern.startswith("[^") and pattern.endswith("]"):
+            pattern = pattern.removeprefix("[^").removesuffix("]")
+            disallowed_chars = set(pattern)
+            return any(char not in disallowed_chars for char in input_line)
+        
+        # search for positive character groups e.g. [abc]
+        elif pattern.startswith("[") and pattern.endswith("]"):
+            pattern = pattern.removeprefix("[").removesuffix("]")
+            allowed_chars = set(pattern)
+            return any(char in allowed_chars for char in input_line)
+        
+        # raise exception for unknown pattern input
+        else:
+            raise RuntimeError(f"Unhandled pattern: {pattern}")
 
 
 def main():
