@@ -10,26 +10,24 @@ def match_pattern(input_line, pattern):
     elif pattern == "\d":
         return any(char.isdigit() for char in input_line)
     elif pattern == "\w":
-        return any((char.isdigit() or char.isslpha()) for char in input_line)
+        return any((char.isdigit() or char.isalpha()) for char in input_line)
     else:
         raise RuntimeError(f"Unhandled pattern: {pattern}")
 
 
 def main():
-    pattern = sys.argv[2]
-    input_line = sys.stdin.read()
-
     if sys.argv[1] != "-E":
         print("Expected first argument to be '-E'")
         exit(1)
 
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    print("Logs from your program will appear here!")
+    pattern, input_line = sys.argv[2], sys.argv[3]
 
-    # Uncomment this block to pass the first stage
+
     if match_pattern(input_line, pattern):
+        print(f"\033[32mTest Passed\033[0m")
         exit(0)
     else:
+        print(f"\033[31mTest Failed\033[0m")
         exit(1)
 
 
