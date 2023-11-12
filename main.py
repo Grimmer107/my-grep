@@ -10,7 +10,11 @@ def match_pattern(input_line, pattern):
     elif pattern == "\d":
         return any(char.isdigit() for char in input_line)
     elif pattern == "\w":
-        return any((char.isdigit() or char.isalpha()) for char in input_line)
+        return any(char.isalnum() for char in input_line)
+    elif pattern.startswith("[") and pattern.endswith("]"):
+        pattern = pattern.removeprefix("[").removesuffix("]")
+        allowed_chars = set(pattern)
+        return any(char in allowed_chars for char in input_line)
     else:
         raise RuntimeError(f"Unhandled pattern: {pattern}")
 
