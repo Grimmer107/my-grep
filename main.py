@@ -1,29 +1,37 @@
 import sys
-import re
+
 # import pyparsing - available if you need it!
 # import lark - available if you need it!
 
 
 def match_pattern(input_line, patterns):
-    # pattern = re.split('[\\\[\]]', pattern)
-    patterns = patterns.replace(" ", " \s ")
-    patterns = patterns.replace("\d", "\d ").replace("\w", "\w ")
-    patterns = patterns.replace("[", " [").replace("]", "] ").split()
+    patterns = parse_pattern(patterns)
     char_count = 0
-    print(patterns)
 
     for idx, pattern in enumerate(patterns):
-        # search a specific single character
-        if len(pattern) == 1:
-            return pattern in input_line
-        
         # search for numeric character
-        elif pattern == "\d":
-            return any(char.isdigit() for char in input_line)
+        if pattern == "\d":
+            if input_line[char_count].isdigit() == False:
+                return False
+            char_count += 1
         
         # search for alphanumeric character
         elif pattern == "\w":
-            return any(char.isalnum() for char in input_line)
+            if input_line[char_count].isalnum() == False:
+                return False
+            char_count += 1
+
+        # search for space character
+        elif pattern == "\s":
+            if input_line[char_count] != " ":
+                return False
+            char_count += 1
+
+        # search specific characters
+        elif (pattern.startswith("/") or pattern.startswith("[")) == False:
+            if pattern != input_line[char_count:char_count+len(pattern)]:
+                return False
+            char_count += len(pattern)
         
         # search for negative character groups e.g. [^abc]
         elif pattern.startswith("[^") and pattern.endswith("]"):
@@ -41,14 +49,26 @@ def match_pattern(input_line, patterns):
         else:
             raise RuntimeError(f"Unhandled pattern: {pattern}")
 
+    return True
+
+def parse_pattern(patterns):
+    patterns = patterns.replace(" ", " \s ")
+    patterns = patterns.replace("\d", " \d ").replace("\w", " \w ")
+    patterns = patterns.replace("[", " [").replace("]", "] ").split()
+    return patterns
+
 
 def main():
+    
     if sys.argv[1] != "-E":
         print("Expected first argument to be '-E'")
         exit(1)
 
-    pattern, input_line = sys.argv[2], sys.argv[3]
+    if len(sys.argv) != 4:
+        print("Program expects four arguments.")
+        exit(1)
 
+    pattern, input_line = sys.argv[2], sys.argv[3]
 
     if match_pattern(input_line, pattern):
         print(f"\033[32mTest Passed\033[0m")
